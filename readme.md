@@ -2,7 +2,16 @@
 
 ## Indice
 
-
+- [Introducción](#introducción)
+  - [Indice](#indice)
+  - [Parciales](#parciales)
+  - [Información Extra](#información-extra)
+- [Clase 1 - Repaso](#clase-1---repaso)
+- [Clase 2 - Estructura de Datos - Pila](#clase-2---estructura-de-datos---pila)
+  - [Nodos](#nodos)
+  - [Memoria Pila (stack)](#memoria-pila-stack)
+    - [Pila con un vector estatico](#pila-con-un-vector-estatico)
+    - [Ejercicio Parcial](#ejercicio-parcial)
 
 ## Parciales
 
@@ -67,7 +76,6 @@ int pila_llena(const t_pila *pp, size_t tam_el);
 
 la pila puede ser estatica (vector comun) o dinamica (nodos).
 
-
 ### Pila con un vector estatico
 
 Hay 2 maneras de implementor, en ambos se crean una variable size_t para indicar hasta que posicion se encuentra la pila:
@@ -93,61 +101,75 @@ Las funciones las podemos definir como:
 #define PILA_LLENA -3
 #define PILA_VACIA -2
 
-int poner_en_pila(t_pila *pp, const void *el, size_t tam_el)
+void crear_pila(t_pila *pila)
 {
-    if( pp->tope > tam_el + sizeof(size_t) )
-    {
-        return PILA_LLENA;
-    }
-
-    pp->tope -= tam_el;
-    memcpy(pp->vec + pp->tope, el, tam_el);
-    pp->tope -= sizeof(size_t);
-    memcpy(pp->vec + pp->tope, &tam_el, sizeof(size_t));
-    return EXITO;
+    pila->tope = TAM_PILA;
 }
 
-int sacar_de_pila(t_pila *pp, const void *el, size_t tam_el)
+void vaciar_pila(t_pila *pila)
 {
-    size_t tam_pila;
-    if(pp->tope == TAM_PILA)
+    pila->tope = TAM_PILA;
+}
+
+int pila_llena(t_pila *pila, size_t tam_el)
+{
+    return pila->tope < tam_el + sizeof(size_t) ? PILA_LLENA : EXITO;
+}
+
+int pila_vacia(t_pila *pila)
+{
+    return pila->tope == TAM_PILA ? PILA_VACIA : EXITO;
+}
+
+int ver_tope(t_pila *pila, void *el, size_t tam_el)
+{
+    size_t tam_info;
+
+    if(pila->tope == TAM_PILA)
     {
         return PILA_VACIA;
     }
 
-    memcpy(&tam_pila, pp->vec + pp->tope, sizeof(size_t));
-    pp->tope += sizeof(size_t);
-    //memcpy(el, pp->vec + pp->tope, tam_pila > tam_el ? tam_el : tam_pila); 
-    memcpy(el, pp->vec + pp->tope, min(tam_pila, tam_el));
-    pp->tope += tam_pila;
-    return EXITO; 
+    memcpy(&tam_info, pila->vec + pila->tope, sizeof(size_t));
+    memcpy(el, pila->vec + pila->tope + sizeof(size_t), tam_el > tam_info ? tam_info : tam_el);
+
+    return EXITO;
 }
 
-void crear_pila(t_pila *pp)
+int sacar_de_pila(t_pila *pila, void *el, size_t tam_el)
 {
+    size_t tam_info;
 
+    if(pila->tope == TAM_PILA)
+    {
+        return PILA_VACIA;
+    }
+
+    memcpy(&tam_info, pila->tope + pila->vec, sizeof(size_t));
+    pila->tope += sizeof(size_t);
+
+    memcpy(el, pila->tope + pila->vec, tam_el > tam_info ? tam_info : tam_el);
+    pila->tope += tam_info;
+
+    return EXITO;
 }
 
-int ver_tope(const t_pila *pp, void *el, size_t tam_el)
+int poner_en_pila(t_pila *pila, void *el, size_t tam_el)
 {
+    if(pila->tope < tam_el + sizeof(size_t))
+    {
+        return PILA_LLENA;
+    }
 
-}
+    pila->tope -= tam_el;
+    memcpy(pila->vec + pila->tope, el, tam_el);
 
-void vaciar_pila(t_pila *pp)
-{
-    pp->tope = TAM_PILA;
-}
+    pila->tope -= sizeof(size_t);
+    memcpy(pila->vec + pila->tope, &tam_el, sizeof(size_t));
 
-int pila_vacia(t_pila *pp)
-{
-    return pp->tope == TAM_PILA ? PILA_VACIA : EXITO;
-}
-
-int pila_llena(const t_pila *pp, size_t tam_el)
-{
-    return pp->tope == 1 ? PILA_LLENA : EXITO;
+    return EXITO;
 }
 ~~~
 
-### Ejercicio
+### Ejercicio Parcial
 
